@@ -8,10 +8,11 @@ from config import Config
 app = Flask(__name__)
 app.secret_key = Config.SECRET_KEY
 
-API = 'https://xbanjubmkjqgryoiridz.supabase.co/rest/v1'
+API = Config.SUPABASE_URL
+ANON = Config.SUPABASE_ANON_KEY
 HEADERS = {
-    'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiYW5qdWJta2pxZ3J5b2lyaWR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODIwODEsImV4cCI6MjA5NzU1ODA4MX0.uCy1x-clCRbCirv2c2rigM--z6SAJcvOf6GRskT-XCs',
-    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiYW5qdWJta2pxZ3J5b2lyaWR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODIwODEsImV4cCI6MjA5NzU1ODA4MX0.uCy1x-clCRbCirv2c2rigM--z6SAJcvOf6GRskT-XCs',
+    'apikey': ANON,
+    'Authorization': f'Bearer {ANON}',
     'Content-Type': 'application/json',
     'Prefer': 'return=representation'
 }
