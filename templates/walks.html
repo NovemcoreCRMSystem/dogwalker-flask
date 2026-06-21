@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% block title %}Walks{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 fw-bold"><i class="bi bi-map me-2"></i>Walks</h4>
+    <a href="/walks/add" class="btn btn-warning"><i class="bi bi-plus-lg me-1"></i>Schedule Walk</a>
+</div>
+
+{% if editing %}
+<div class="card form-card mb-4">
+    <div class="card-header bg-white py-3">
+        <h6 class="mb-0 fw-bold">{{ 'Edit' if editing != 'new' else 'Schedule' }} Walk</h6>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ '/walks/' + editing|string + '/edit' if editing != 'new' else '/walks/add' }}">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Dog *</label>
+                    <select name="dog_id" class="form-select" required>
+                        <option value="">Select dog...</option>
+                        {% for d in dogs %}
+                        <option value="{{ d.id }}" {{ 'selected' if form.dog_id == d.id else '' }}>{{ d.dog_name }} ({{ d.customers.first_name ~ ' ' ~ d.customers.last_name if d.customers else '' }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Walker *</label>
+                    <select name="walker_id" class="form-select" required>
+                        <option value="">Select walker...</option>
+                        {% for w in walkers %}
+                        <option value="{{ w.id }}" {{ 'selected' if form.walker_id == w.id else '' }}>{{ w.first_name }} {{ w.last_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Date *</label>
+                    <input type="date" name="walk_date" class="form-control" value="{{ form.walk_date or today }}" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Duration (min)</label>
+                    <input type="number" name="duration" class="form-control" value="{{ form.duration or '30' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Fee (&euro;)</label>
+                    <input type="number" step="0.01" name="fee" class="form-control" value="{{ form.fee or '' }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="scheduled" {{ 'selected' if form.status == 'scheduled' else '' }}>Scheduled</option>
+                        <option value="in_progress" {{ 'selected' if form.status == 'in_progress' else '' }}>In Progress</option>
+                        <option value="completed" {{ 'selected' if form.status == 'completed' else '' }}>Completed</option>
+                        <option value="cancelled" {{ 'selected' if form.status == 'cancelled' else '' }}>Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label small fw-semibold">Notes</label>
+                    <textarea name="notes" class="form-control" rows="2">{{ form.notes or '' }}</textarea>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button type="submit" class="btn btn-warning"><i class="bi bi-check-lg me-1"></i>Save</button>
+                <a href="/walks" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Dog</th>
+                        <th>Walker</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Duration</th>
+                        <th>Fee</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for w in walks %}
+                    <tr class="{{ 'table-warning' if editing == w.id else '' }}">
+                        <td class="fw-medium">{{ w.dog_name }}</td>
+                        <td>{{ w.walker_name }}</td>
+                        <td>{{ w.customer_name }}</td>
+                        <td>{{ fmt_date(w.walk_date) }}</td>
+                        <td>{{ w.duration or '-' }}m</td>
+                        <td>{% if w.fee %}&euro;{{ "%.2f"|format(w.fee|float) }}{% else %}-{% endif %}</td>
+                        <td>
+                            <span class="badge {% if w.status == 'completed' %}bg-success{% elif w.status == 'in_progress' %}bg-warning text-dark{% elif w.status == 'cancelled' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                {{ w.status }}
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <a href="/walks/{{ w.id }}/edit" class="btn btn-sm btn-outline-primary me-1" title="Edit"><i class="bi bi-pencil"></i></a>
+                            <button class="btn btn-sm btn-outline-info me-1" title="Send booking confirmation" onclick="triggerN8n('booking', '{{ w.id }}')"><i class="bi bi-envelope"></i></button>
+                            <button class="btn btn-sm btn-outline-success me-1" title="Mark complete & notify" onclick="triggerN8n('completion', '{{ w.id }}')"><i class="bi bi-check2-circle"></i></button>
+                            <form method="POST" action="/walks/{{ w.id }}/delete" style="display:inline" onsubmit="return confirm('Delete this walk?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="8" class="text-center text-muted py-4">No walks scheduled yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function triggerN8n(type, walkId) {
+    const url = type === 'booking' ? '/api/trigger-booking/' : '/api/trigger-completion/';
+    const label = type === 'booking' ? 'Confirmation sent' : 'Completion notified';
+    try {
+        const r = await fetch(url + walkId, { method: 'POST' });
+        const data = await r.json();
+        if (data.status === 'ok') {
+            alert(label + ' successfully!');
+        } else {
+            alert('Error: ' + (data.message || 'unknown'));
+        }
+    } catch(e) {
+        alert('Error triggering n8n: ' + e.message);
+    }
+}
+</script>
+{% endblock %}

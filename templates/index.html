@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 fw-bold"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h4>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small text-uppercase fw-semibold">Customers</div>
+                    <div class="fs-2 fw-bold mt-1">{{ customers }}</div>
+                </div>
+                <div class="icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-people"></i></div>
+            </div>
+            <a href="/customers" class="stretched-link"></a>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small text-uppercase fw-semibold">Dogs</div>
+                    <div class="fs-2 fw-bold mt-1">{{ dogs }}</div>
+                </div>
+                <div class="icon bg-success bg-opacity-10 text-success"><i class="bi bi-heart"></i></div>
+            </div>
+            <a href="/dogs" class="stretched-link"></a>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small text-uppercase fw-semibold">Walkers</div>
+                    <div class="fs-2 fw-bold mt-1">{{ walkers }}</div>
+                </div>
+                <div class="icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-person-walking"></i></div>
+            </div>
+            <a href="/walkers" class="stretched-link"></a>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small text-uppercase fw-semibold">Walks</div>
+                    <div class="fs-2 fw-bold mt-1">{{ walks }}</div>
+                </div>
+                <div class="icon bg-info bg-opacity-10 text-info"><i class="bi bi-map"></i></div>
+            </div>
+            <a href="/walks" class="stretched-link"></a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2"></i>Recent Walks</h6>
+        <a href="/walks" class="btn btn-sm btn-outline-secondary">View All</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Dog</th>
+                        <th>Walker</th>
+                        <th>Date</th>
+                        <th>Duration</th>
+                        <th>Fee</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for w in recent_walks %}
+                    <tr>
+                        <td class="fw-medium">{{ w.dog_name }}</td>
+                        <td>{{ w.walker_name }}</td>
+                        <td>{{ fmt_date(w.walk_date) }}</td>
+                        <td>{{ w.duration or '-' }}m</td>
+                        <td>{% if w.fee %}&euro;{{ "%.2f"|format(w.fee|float) }}{% else %}-{% endif %}</td>
+                        <td>
+                            <span class="badge {% if w.status == 'completed' %}bg-success{% elif w.status == 'in_progress' %}bg-warning text-dark{% elif w.status == 'cancelled' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                {{ w.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center text-muted py-4">No walks scheduled yet. <a href="/walks">Schedule one</a></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-2">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small text-uppercase fw-semibold">Payments</div>
+                    <div class="fs-2 fw-bold mt-1">{{ payments }}</div>
+                </div>
+                <div class="icon bg-success bg-opacity-10 text-success"><i class="bi bi-currency-euro"></i></div>
+            </div>
+            <a href="/payments" class="stretched-link"></a>
+        </div>
+    </div>
+</div>
+{% endblock %}

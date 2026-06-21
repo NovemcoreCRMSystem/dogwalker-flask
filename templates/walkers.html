@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Walkers{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 fw-bold"><i class="bi bi-person-walking me-2"></i>Walkers</h4>
+    <a href="/walkers/add" class="btn btn-warning"><i class="bi bi-plus-lg me-1"></i>Add Walker</a>
+</div>
+
+{% if editing %}
+<div class="card form-card mb-4">
+    <div class="card-header bg-white py-3">
+        <h6 class="mb-0 fw-bold">{{ 'Edit' if editing != 'new' else 'Add' }} Walker</h6>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ '/walkers/' + editing|string + '/edit' if editing != 'new' else '/walkers/add' }}">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">First Name *</label>
+                    <input type="text" name="first_name" class="form-control" value="{{ form.first_name or '' }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Last Name *</label>
+                    <input type="text" name="last_name" class="form-control" value="{{ form.last_name or '' }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Email</label>
+                    <input type="email" name="email" class="form-control" value="{{ form.email or '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Phone</label>
+                    <input type="text" name="phone" class="form-control" value="{{ form.phone or '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Availability</label>
+                    <input type="text" name="availability" class="form-control" value="{{ form.availability or '' }}" placeholder="e.g. Mon-Fri 9-5">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Max Dogs/Day</label>
+                    <input type="number" name="max_dogs" class="form-control" value="{{ form.max_dogs or '' }}">
+                </div>
+            </div>
+            <div class="mt-3">
+                <button type="submit" class="btn btn-warning"><i class="bi bi-check-lg me-1"></i>Save</button>
+                <a href="/walkers" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Availability</th>
+                        <th>Rating</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for w in walkers %}
+                    <tr class="{{ 'table-warning' if editing == w.id else '' }}">
+                        <td class="fw-medium">{{ w.first_name }} {{ w.last_name }}</td>
+                        <td>{{ w.email or '-' }}</td>
+                        <td>{{ w.phone or '-' }}</td>
+                        <td>{{ w.availability or '-' }}</td>
+                        <td>{% if w.rating %}{{ w.rating }}/5{% else %}-{% endif %}</td>
+                        <td class="text-end">
+                            <a href="/walkers/{{ w.id }}/edit" class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-pencil"></i></a>
+                            <form method="POST" action="/walkers/{{ w.id }}/delete" style="display:inline" onsubmit="return confirm('Delete {{ w.first_name }} {{ w.last_name }}?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center text-muted py-4">No walkers yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
