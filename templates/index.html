@@ -80,7 +80,7 @@
                         <td class="fw-medium">{{ w.dog_name }}</td>
                         <td>{{ w.walker_name }}</td>
                         <td>{{ fmt_date(w.walk_date) }}</td>
-                        <td>{{ w.duration or '-' }}m</td>
+                        <td>{{ w.duration or '-' }}</td>
                         <td>{% if w.fee %}&euro;{{ "%.2f"|format(w.fee|float) }}{% else %}-{% endif %}</td>
                         <td>
                             <span class="badge {% if w.status == 'completed' %}bg-success{% elif w.status == 'in_progress' %}bg-warning text-dark{% elif w.status == 'cancelled' %}bg-danger{% else %}bg-secondary{% endif %}">
